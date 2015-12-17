@@ -1,0 +1,22 @@
+{
+  "name": "billingProblem",
+  "version": "1.0.0",
+  "description": "project to solve billing problem for talkdesk",
+  "main": "server.js",
+  "bin": {
+    "billingProblem": "cli.js"
+  },
+  "scripts": {
+    "test": "npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Talkdesk/challenge_vitorviana.git"
+  },
+  "author": "vitor viana",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Talkdesk/challenge_vitorviana/issues"
+  },
+  "homepage": "https://github.com/Talkdesk/challenge_vitorviana"
+}
