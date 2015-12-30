@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/Talkdesk/challenge_vitorviana/issues"
   },
-  "homepage": "https://github.com/Talkdesk/challenge_vitorviana"
+  "homepage": "https://github.com/Talkdesk/challenge_vitorviana",
+  "dependencies": {
+    "opts": "^1.2.2"
+  }
 }
