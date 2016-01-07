@@ -1,5 +1,6 @@
 var  Logger = require('../lib/utils/logger/logger.js'),
   BillingData = require('../lib/data/billing-data.js'),
+  EtlProcess  = require('../lib/bussiness/etl.js'),
   Configuration = require('../lib/utils/configuration-multi-file/configuration-multi-file.js');
 
 function start(err, data) {
@@ -33,6 +34,10 @@ function start(err, data) {
     //Initializate data providers
     BillingData.initialize(data,function(){
       console.log("billing data initializate");
+    });
+
+    EtlProcess.processFile(function(err,data){
+      console.log("all pricing database was processed")
     });
 
 

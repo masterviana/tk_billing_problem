@@ -1,6 +1,6 @@
 var Logger = require('../utils/logger/logger.js'),
-    async  = require('async'),
-    Store = require('../utils/store/store');
+  async = require('async'),
+  Store = require('../utils/store/store');
 
 
 var BillingData = function() {
@@ -16,7 +16,6 @@ BillingData.getInstance = function() {
   return this.instance;
 };
 
-
 BillingData.prototype = {
   initialize: function(configuration, callback) {
 
@@ -31,15 +30,14 @@ BillingData.prototype = {
     };
 
     this.configuration = configuration;
+
     console.log("config for data billing is ")
     console.log(this.configuration)
-
 
     this.logger = new Logger();
     this.logger.setContext('Billing Data Bussiness');
 
-    this.initializeStores(configuration,callback);
-
+    this.initializeStores(configuration, callback);
   },
   initializeStores: function(configuration, callback) {
     var self = this;
@@ -86,9 +84,26 @@ BillingData.prototype = {
       callback(error);
     }.bind(this));
   },
+  insertPricingKey: function(key, object, callback) {
+    var self = this;
+    self.logger.debug("call insertPricingKey with key ",key, "");
+    self.performOperation("set", "L2", null, {
+      key: key,
+      value: JSON.stringify(object),
+      callback: function(err, data) {
+        if(callback){
+          callback(err, data);
+        }
+      }
+    });
+  },
   performOperation: function(operation, level, time, args) {
 
     var self = this;
+    console.log("cache store is ")
+    console.log(self.cachesStore)
+
+
     self.cachesStore[level][operation].apply(self.cachesStore[level], [args]);
 
     if (time) {

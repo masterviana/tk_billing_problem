@@ -30,3 +30,7 @@ function HashCode(text, callback) {
         }
     }
 };
+
+this.is_numeric = function(n){
+    return /^\d+$/.test(n) || !isNaN(n) && n.toString().indexOf('.') != -1;
+}

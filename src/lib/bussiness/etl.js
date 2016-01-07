@@ -1,7 +1,23 @@
+var EventManger = require("../utils/event-manager.js"),
+  fs = require('fs'),
+  utils = require('../utils/utils.js'),
+  Logger = require('../utils/logger/logger.js'),
+  billingData = require('../data/billing-data.js'),
+  readline = require('readline');
 
+var PROCESS_SET_OF_LINES_EVENT = "_processLines"
+var INSERT_REDIS = "_INSERT_ON_REDIS"
 
 var etl = function() {
+  this.priceDatabasePath = "lib/utils/db-prices/prices.txt";
+  this.totalReadLines = 0;
+  this.totalProcessedLines = 0;
 
+  this.logger = new Logger();
+  this.logger.setContext('ETL INSTANCE');
+
+  EventManger.subscribe(PROCESS_SET_OF_LINES_EVENT, this.processFileLineHandler.bind(this));
+  EventManger.subscribe(INSERT_REDIS, this.insertOnRedis.bind(this));
 }
 
 etl.instance = null;
@@ -12,6 +28,75 @@ etl.getInstance = function() {
   return this.instance;
 };
 
+
+etl.prototype = {
+  processFile: function(callback) {
+    var self = this;
+
+    var rd = readline.createInterface({
+      input: fs.createReadStream(this.priceDatabasePath),
+      output: process.stdout,
+      terminal: false
+    });
+
+    rd.on('line', function(line) {
+      self.totalReadLines = self.totalReadLines + 1;
+      EventManger.publish(PROCESS_SET_OF_LINES_EVENT, line);
+    });
+
+    rd.on('close', function(line) {
+      if(self.totalReadLines != self.totalProcessedLines){
+        self.logger.warn("number of lines on files is ", self.totalReadLines, " total processed lines ", self.totalProcessedLines," should be the same");
+      }
+      callback(null, "SETUP ALL PRICING DATA ON REDIS");
+    });
+
+  },
+  processFileLineHandler: function(line) {
+    var self = this;
+
+    var splitResult = line.split(",");
+    // self.logger.warn("split result is ", splitResult.length, " <> ", splitResult);
+
+    if (splitResult.length < 3) {
+      self.logger.error("Problem process database, any line must have at the format country, price, start number ", line);
+    } else {
+      var country = ""
+      var pricePerMinute = ""
+      var keys = []
+      var len = splitResult.length;
+      var firstNumber = false;
+
+      for (var i = 0; i < len; i++) {
+        var item =  splitResult[i];
+        item = item.replace(/\"/g, '');
+        item = item.trim();
+
+        if (!utils.is_numeric(item)) {
+          if (firstNumber) {
+            self.logger.error("error processing line, must have number");
+          } else {
+            country +=  (country == "" ? "" : ", ") + item
+          }
+        } else {
+          if (firstNumber == false) {
+            pricePerMinute = item;
+            firstNumber = true;
+          } else {
+            EventManger.publish(INSERT_REDIS,item,{country:country,pricePerMinute:pricePerMinute})
+          }
+        }
+      }
+      self.totalProcessedLines = self.totalProcessedLines + 1;
+    }
+  },
+  insertOnRedis : function(key,obj){
+    var self = this;
+    self.logger.debug("will add key on redis key is ",key, " and object is ", JSON.stringify(obj));
+    billingData.insertPricingKey(key,obj);
+  }
+
+}
 
 
 exports = module.exports = etl.getInstance();
