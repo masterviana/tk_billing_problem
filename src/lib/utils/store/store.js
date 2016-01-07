@@ -1,23 +1,19 @@
 
-var exceptionManager = require('../exception-manager/exception-manager.js'),
-    Strings = require('../strings.js'),
-    Logger = require('../logger/logger.js'),
-    ConsoleLogger = require('../logger/provider/logger-provider-console.js');
+var storeExceptionCodes = require("./store-exception-codes.js"),
+    Strings = require('../utils.js'),
+    Logger = require('../logger/logger.js');
 
-var logger = new Logger(new ConsoleLogger());
-logger.setContext("Store");
+var logger = new Logger();
+logger.setContext("Provider Context");
 
-/**
- * @constructor
- * @param {object} provider The provider.
- * @throws Exception code ST1 : Invalid provider if it is null or not an object.
- */
+
 var Store = module.exports = function (providers) {
     this.logger_ = new Logger();
-    this.logger_.setContext(" Lib Store");
+    this.logger_.setContext("Billing problem Lib Store");
 
     if (!providers || ((providers instanceof Array) && !providers.length)) {
-        exceptionManager.throwException('ST1', providers);
+        // exceptionManager.throwException('ST1', providers);
+        console.log(storeExceptionCodes["ST1"])
     }
 
     this.providers_ = [];
@@ -32,27 +28,22 @@ var Store = module.exports = function (providers) {
 
 Store.prototype.logger_ = null;
 
-/**
- * Adds a new provider to the array of providers.
- * @param {StoreProvider} Instance of a message bus provider
- */
+
 Store.prototype.addProvider = function (provider) {
     if (!provider) {
-        exceptionManager.throwException('ST13', null);
+        // exceptionManager.throwException('ST13', null);
+          console.log(storeExceptionCodes["ST13"])
     }
 
     this.providers_.push(provider);
 };
 
-/**
- * Adds a new provider to the array of providers.
- * @param {string} Provider name
- * @throws Unable to remove provider if the providers array length will be equal to 1
- */
+
 Store.prototype.removeProvider = function (provider) {
     //NOTE: compares if length is equal to 1
     if (!(this.providers_.length >> 1)) {
-        exceptionManager.throwException('ST13', null);
+        // exceptionManager.throwException('ST13', null);
+        console.log(storeExceptionCodes["ST13"])
     }
 
     var currentIndex = 0;
@@ -70,10 +61,7 @@ Store.prototype.removeProvider = function (provider) {
     return !! ~providerIndex;
 };
 
-/**
- * Check if the message bus contains any provider with the specified name
- * @param {string} Provider name
- */
+
 Store.prototype.hasProvider = function (provider) {
     var currentIndex = 0;
     var providerIndex = -1;
@@ -85,22 +73,16 @@ Store.prototype.hasProvider = function (provider) {
     return !! ~providerIndex;
 };
 
-/**
- * @public
- * @returns {object} The provider.
- */
+
 Store.prototype.getProviders = function () {
     return this.providers_;
 };
 
-/**
- * @public
- * @param {object} param The parameters as an object literal.
- * @throws Exception code ST2 : Invalid parameter if it is null or not an object.
- */
+
 Store.prototype.get = function (param) {
     if (!param || !(param instanceof Object)) {
-        exceptionManager.throwException('ST2', null);
+        // exceptionManager.throwException('ST2', null);
+        console.log(storeExceptionCodes["ST2"])
     }
     else {
         this.getProvider_(param.key, function (provider) {
@@ -109,14 +91,11 @@ Store.prototype.get = function (param) {
     }
 };
 
-/**
-* @public
-* @param {object} param The parameters as an object literal.
-* @throws Exception code ST2 : Invalid parameter if it is null or not an object.
-*/
+
 Store.prototype.getAll = function (param) {
     if (!param || !(param instanceof Object)) {
-        exceptionManager.throwException('ST2', null);
+        // exceptionManager.throwException('ST2', null);
+        console.log(storeExceptionCodes["ST2"])
     }
     else {
         this.getProvider_(param.key, function (provider) {
@@ -125,14 +104,10 @@ Store.prototype.getAll = function (param) {
     }
 };
 
-/**
- * @public
- * @param {object} param The parameters as an object literal.
- * @throws Exception code ST3 : Invalid parameter if it is null or not an object.
- */
 Store.prototype.set = function (param) {
     if (!param || !(param instanceof Object)) {
-        exceptionManager.throwException('ST3', null);
+        // exceptionManager.throwException('ST3', null);
+        console.log(storeExceptionCodes["ST3"])
     }
     else {
         this.getProvider_(param.key, function (provider) {
@@ -141,18 +116,266 @@ Store.prototype.set = function (param) {
     }
 };
 
-/**
- * @public
- * @param {object} param The parameters as an object literal.
- * @throws Exception code ST4 : Invalid parameter if it is null or not an object.
- */
+
 Store.prototype.del = function (param) {
     if (!param || !(param instanceof Object)) {
-        exceptionManager.throwException('ST4', null);
+        // exceptionManager.throwException('ST4', null);
+          console.log(storeExceptionCodes["ST4"])
+
     }
     else {
         this.getProvider_(param.key, function (provider) {
             provider.del(param);
         });
     }
+};
+
+
+Store.prototype.incr = function (param) {
+    if (!param || !(param instanceof Object)) {
+        // exceptionManager.throwException('ST5', null);
+          console.log(storeExceptionCodes["ST5"])
+    }
+    else {
+        this.getProvider_(param.key, function (provider) {
+            provider.incr(param);
+        });
+    }
+};
+
+
+Store.prototype.decr = function (param) {
+    if (!param || !(param instanceof Object)) {
+        // exceptionManager.throwException('ST6', null);
+        console.log(storeExceptionCodes["ST6"])
+    }
+    else {
+        this.getProvider_(param.key, function (provider) {
+            provider.decr(param);
+        });
+    }
+};
+
+
+Store.prototype.exists = function (param) {
+    if (!param || !(param instanceof Object)) {
+        // exceptionManager.throwException('ST7', null);
+        console.log(storeExceptionCodes["ST7"])
+    }
+    else {
+        this.getProvider_(param.key, function (provider) {
+            provider.exists(param);
+        });
+    }
+};
+
+Store.prototype.persist = function (param) {
+    if (!param || !(param instanceof Object)) {
+        // exceptionManager.throwException('ST8', null);
+        console.log(storeExceptionCodes["ST8"])
+    }
+    else {
+        this.getProvider_(param.key, function (provider) {
+            provider.persist(param);
+        });
+    }
+};
+
+
+Store.prototype.ttl = function (param) {
+    if (!param || !(param instanceof Object)) {
+        // exceptionManager.throwException('ST9', null);
+        console.log(storeExceptionCodes["ST9"])
+    }
+    else {
+        this.getProvider_(param.key, function (provider) {
+            provider.ttl(param);
+        });
+    }
+};
+
+Store.prototype.expire = function (param) {
+    if (!param || !(param instanceof Object)) {
+        // exceptionManager.throwException('ST10', null);
+        console.log(storeExceptionCodes["ST10"])
+    }
+    else {
+        this.getProvider_(param.key, function (provider) {
+            provider.expire(param);
+        });
+    }
+};
+
+Store.prototype.expireAt = function (param) {
+    if (!param || !(param instanceof Object)) {
+        // exceptionManager.throwException('ST11', null);
+        console.log(storeExceptionCodes["ST11"])
+    }
+    else {
+        this.getProvider_(param.key, function (provider) {
+            provider.expireAt(param);
+        });
+    }
+};
+
+
+Store.prototype.keys = function (param) {
+    if (!param || !(param instanceof Object)) {
+        // exceptionManager.throwException('ST12', null);
+        console.log(storeExceptionCodes["ST12"])
+    }
+    else {
+        this.getProvider_(param.key, function (provider) {
+            provider.keys(param);
+        });
+    }
+};
+
+Store.prototype.findKeys = function (param) {
+    var self = this;
+    if (!param || !(param instanceof Object)) {
+        console.log(storeExceptionCodes["ST12"])
+        // exceptionManager.throwException('ST12', null);
+    }
+    else {
+        if (param.key && (self.providers_.length > 1) && ((typeof param.key) == "string") && (param.key.indexOf("*") >= 0)) {
+            var checkedProviders = 0;
+            var result = null;
+            for (var providerIndex = 0; providerIndex < self.providers_.length; providerIndex++) {
+                var provider = self.providers_[providerIndex];
+                provider.findKeys({
+                    key: param.key,
+                    callback: function (err,res) {
+                        checkedProviders++;
+                        if (res) {
+                            result = result ? result.concat(res) : res;
+                        }
+
+                        if (err || (checkedProviders == self.providers_.length)) {
+                            param.callback(err, result);
+                        }
+                    }
+                });
+            }
+        } else {
+            this.getProvider_(param.key, function (provider) {
+                provider.findKeys(param);
+            });
+        }
+    }
+};
+
+Store.prototype.getProvider_ = function (key, callback) {
+    var self = this;
+    if (self.providers_.length == 1) {
+        callback(self.providers_[0]);
+    } else {
+        Strings.generateHashCode(key, function (hashCode) {
+            var providerIndex = hashCode % self.providers_.length;
+            self.logger_.debug('Key', key, '- Hash Code', hashCode, '- Providers length', self.providers_.length);
+            self.logger_.debug('Provider index', providerIndex);
+            callback(self.providers_[providerIndex]);
+        });
+    }
+};
+
+Store.initializedProviders = Object.create(null);
+
+ Store.initializeProviders = function(configuration,callback){
+    var providerName = "MEMORY";
+
+    if (configuration.providerName) {
+        providerName = configuration.providerName;
+    }
+
+    var storeClients = configuration.storeClients ? configuration.storeClients :  ["unavailable"];
+
+    logger.debug('Initializing clients',providerName);
+    initializeStoreClients(providerName, storeClients, function (err, providers) {
+        if (err) {
+            callback(err, false);
+        } else {
+            callback(null, providers);
+        }
+    });
+ }
+
+ function initializeStoreClients(providerName, storeClients, callback) {
+    var providers = [];
+    var initializedClients = 0;
+    var providersInitializationBuffer = new Array(storeClients.length);
+
+    for(var storeClientIndex = 0; storeClientIndex < storeClients.length; storeClientIndex++){
+        var storeClient = storeClients[storeClientIndex];
+        storeClient.initializationIndex = storeClientIndex;
+        initializeStoreProviders(providerName,storeClient,function(initializedProviders,initializationIndex){
+            providersInitializationBuffer[initializationIndex] = initializedProviders;
+            initializedClients++;
+
+            if(initializedClients == storeClients.length){
+                for(var providerBuffer in providersInitializationBuffer){
+                    providers = providers.concat(providersInitializationBuffer[providerBuffer]);
+                }
+
+                callback(null,providers);
+            }
+        });
+    }
+};
+
+function initializeStoreProviders(providerName, storeClient, callback) {
+    logger.debug('Initializing client',storeClient);
+    var providers = storeClient.unique ? null : Store.initializedProviders[JSON.stringify(storeClient)];
+
+    if(providers){
+        callback(providers);
+    }else{
+        providers = createStoreProviderInstances(providerName,storeClient);
+        var initializedProvidersCounter = 0;
+
+        if(!storeClient.unique){
+            Store.initializedProviders[JSON.stringify(storeClient)] = providers;
+        }
+
+        for(var providersIndex = 0; providersIndex < providers.length; providersIndex++){
+            var provider = providers[providersIndex];
+            provider.initialize(function (err, success) {
+                initializedProvidersCounter++;
+                if (initializedProvidersCounter === providers.length) {
+
+                    callback(providers,storeClient.initializationIndex);
+                }
+            });
+        }
+    }
+};
+
+function createStoreProviderInstances(providerName, storeClient) {
+    var result = [];
+    switch (providerName) {
+        case "REDIS":
+            logger.debug("Creating Redis store provider.");
+            var RedisStore = require('./provider/store-provider-redis.js');
+            for(var portIndex = 0;portIndex < storeClient.ports.length; portIndex++){
+                var port = storeClient.ports[portIndex];
+                result.push(new RedisStore({
+                    'REDIS_HOST': storeClient.host,
+                    'REDIS_PORT': port,
+                    'REDIS_PASSWORD': storeClient.password,
+                    'REDIS_DATABASE': storeClient.database
+                }));
+            }
+            break;
+        case "MEMORY":
+            var MemoryStore = require('./provider/store-provider-memory.js');
+            result.push(new MemoryStore());
+            break;
+        case "MONGO":
+                logger.warn('There is no store provider for \'' + providerName + '\'');
+                break;
+        default:
+            logger.warn('There is no store provider for \'' + providerName + '\'');
+            break;
+    }
+    return result;
 };

@@ -1,4 +1,5 @@
-var  Logger = require('../lib/utils/logger/logger.js');
+var  Logger = require('../lib/utils/logger/logger.js'),
+  BillingData = require('../lib/data/billing-data.js'),
   Configuration = require('../lib/utils/configuration-multi-file/configuration-multi-file.js');
 
 function start(err, data) {
@@ -12,7 +13,6 @@ function start(err, data) {
 
     GLOBAL.billingEx = Object.create(null);
     GLOBAL.billingEx.configuration = data;
-
 
 
     if (data.LOG_LEVEL) {
@@ -29,16 +29,20 @@ function start(err, data) {
 
     logger.setLevel(GLOBAL.billingEx.configuration.LOG_LEVEL);
 
+    console.log("will Initializate billing data");
+    //Initializate data providers
+    BillingData.initialize(data,function(){
+      console.log("billing data initializate");
+    });
 
 
+    var app = require('../lib/rest/rest-server');
+    app.set('port', process.env.PORT || GLOBAL.billingEx.configuration.PORT);
 
-    // var app = require('../lib/rest/rest-server');
-    // app.set('port', process.env.PORT || GLOBAL.mobilePush.configuration.PORT);
-    //
-    // var server = app.listen(app.get('port'), function() {
-    //   logger.error("server is running on port " + server.address().port)
-    //     // debug('Express server listening on port ' );
-    // });
+    var server = app.listen(app.get('port'), function() {
+      logger.error("server is running on port " + server.address().port)
+
+    });
 
   }
 }
