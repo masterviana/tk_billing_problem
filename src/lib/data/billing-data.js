@@ -2,7 +2,6 @@ var Logger = require('../utils/logger/logger.js'),
   async = require('async'),
   Store = require('../utils/store/store');
 
-
 var BillingData = function() {
 
 }
@@ -86,23 +85,38 @@ BillingData.prototype = {
   },
   insertPricingKey: function(key, object, callback) {
     var self = this;
-    self.logger.debug("call insertPricingKey with key ",key, "");
     self.performOperation("set", "L2", null, {
       key: key,
       value: JSON.stringify(object),
       callback: function(err, data) {
-        if(callback){
+        if (callback) {
           callback(err, data);
         }
       }
     });
   },
+  getKeyFromRedis: function(key,callback) {
+    var self = this;
+
+    async.waterfall([
+      function(callback) {
+        self.performOperation("get", "L2", null, {
+          key: key,
+          callback: function(err, data) {
+            if (callback) {
+              callback(err, data);
+            }
+          }
+        });
+      }
+    ], function(err, data) {
+        callback(err,data);
+    });
+
+  },
   performOperation: function(operation, level, time, args) {
 
     var self = this;
-    console.log("cache store is ")
-    console.log(self.cachesStore)
-
 
     self.cachesStore[level][operation].apply(self.cachesStore[level], [args]);
 

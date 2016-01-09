@@ -47,6 +47,8 @@ etl.prototype = {
     rd.on('close', function(line) {
       if(self.totalReadLines != self.totalProcessedLines){
         self.logger.warn("number of lines on files is ", self.totalReadLines, " total processed lines ", self.totalProcessedLines," should be the same");
+      }else{
+        self.logger.info("all database are loaded on redis server ");
       }
       callback(null, "SETUP ALL PRICING DATA ON REDIS");
     });
@@ -92,7 +94,7 @@ etl.prototype = {
   },
   insertOnRedis : function(key,obj){
     var self = this;
-    self.logger.debug("will add key on redis key is ",key, " and object is ", JSON.stringify(obj));
+    // self.logger.debug("will add key on redis key is ",key, " and object is ", JSON.stringify(obj));
     billingData.insertPricingKey(key,obj);
   }
 
