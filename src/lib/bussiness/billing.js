@@ -1,6 +1,7 @@
 var EventManger = require("../utils/event-manager.js"),
   utils = require('../utils/utils.js'),
   async = require("async"),
+  InboundCall = require("../data/contracts/domainObjects/inboundCall.js"),
   billingData = require('../data/billing-data.js'),
   Logger = require('../utils/logger/logger.js');
 
@@ -48,16 +49,16 @@ Billing.prototype = {
       },
       function(talkdesk_phone_number_info, forwarded_phone_number_info, callback) {
         self.applyFormulaCalculationForTotalCharge(input,
-           talkdesk_phone_number_info,
-           forwarded_phone_number_info,
-           function(err, data) {
-             self.logger.debug("back from charge calculations ", data);
-             if(err){
-               callback(err,null);
-             }else{
-               callback(null,data);
-             }
-           });
+          talkdesk_phone_number_info,
+          forwarded_phone_number_info,
+          function(err, data) {
+            self.logger.debug("back from charge calculations ", data);
+            if (err) {
+              callback(err, null);
+            } else {
+              callback(null, data);
+            }
+          });
 
       }
     ], function(err, data) {
@@ -66,12 +67,19 @@ Billing.prototype = {
 
   },
   list: function(input, callback) {
+    this.logger.debug("try get ", input, " from store ");
+
+    billingData.listDomainObject({
+      key: input.account_name
+    }, function(err, data) {
+      callback(err, data);
+    });
 
   },
   applyFormulaCalculationForTotalCharge: function(input, talkdesk_phone_number_info, forwarded_phone_number_info, callback) {
     var self = this;
 
-    self.logger.debug("talkDeskInfo ",talkdesk_phone_number_info, " forwardNumberInfo ",forwarded_phone_number_info );
+    self.logger.debug("talkDeskInfo ", talkdesk_phone_number_info, " forwardNumberInfo ", forwarded_phone_number_info);
 
     async.waterfall([
       function(callback) {
@@ -94,7 +102,7 @@ Billing.prototype = {
         var duration = parseFloat(input.call_duration);
         var minutes = parseFloat(duration / 60).toFixed(2);
 
-        self.logger.debug("FORMULA : talkDeskCost ",talkDeskPpm," forwardNumber Cost ",forwardNumberPpm," profit margin " ,profitMargin , " duration (secs) ",duration, " minutes ",minutes );
+        self.logger.debug("FORMULA : talkDeskCost ", talkDeskPpm, " forwardNumber Cost ", forwardNumberPpm, " profit margin ", profitMargin, " duration (secs) ", duration, " minutes ", minutes);
         var callTotalChargeIs = parseFloat(talkDeskPpm + forwardNumberPpm + profitMargin) * minutes
         self.logger.warn("Price to be charge for this call is ", callTotalChargeIs);
         EventManger.publish(ADD_CALL_CHARGE_TO_PROFILE, input, callTotalChargeIs);
@@ -107,9 +115,19 @@ Billing.prototype = {
 
   },
   addCallChargeToClientProfile: function(input, totalCharge) {
+    var self = this;
+
+    var inboundCall = new InboundCall(input);
+    inboundCall.data.call_cost = totalCharge;
+
+    billingData.saveDomainObject(inboundCall, function(err, data) {
+      if (!err) {
+        self.logger.debug("save new entry in CALL DB");
+      }
+    });
 
   },
-  talkDeskNumberPricePerMinute:function(input, talkdesk_phone_number_info, callback) {
+  talkDeskNumberPricePerMinute: function(input, talkdesk_phone_number_info, callback) {
 
     if (talkdesk_phone_number_info.country.indexOf("United States") != -1) {
       this.logger.debug("will apply United States tax for talkdeskNumber");
@@ -124,14 +142,14 @@ Billing.prototype = {
   externalNumberPricePerMinute: function(input, forwarded_phone_number_info, callback) {
     if (input.forwarded_phone_number == "") {
       this.logger.debug("externalNumberPricePerMinute is ", GLOBAL.billingEx.configuration.TALKDESK_SPECIAL_PRICES.DEFAULT_INCOMING_BROWSER);
-      callback(null, GLOBAL.billingEx.configuration.TALKDESK_SPECIAL_PRICES.DEFAULT_INCOMING_BROWSER );
+      callback(null, GLOBAL.billingEx.configuration.TALKDESK_SPECIAL_PRICES.DEFAULT_INCOMING_BROWSER);
     } else {
       this.logger.debug("externalNumberPricePerMinute is ", forwarded_phone_number_info.pricePerMinute);
       var pricePerMinute = parseFloat(forwarded_phone_number_info.pricePerMinute);
       callback(null, pricePerMinute);
     }
   },
-  caculateProfitMargin:function(input, callback) {
+  caculateProfitMargin: function(input, callback) {
     //Just need to get client profile to reajust the margin price based on minutes per mount
     //for now it's hardcode on 0.05
     var profitMargin = GLOBAL.billingEx.configuration.TALKDESK_SPECIAL_PRICES.DEFAULT_PROFIT_MARGIN;

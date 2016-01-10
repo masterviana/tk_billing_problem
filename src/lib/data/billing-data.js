@@ -92,7 +92,8 @@ BillingData.prototype = {
       }
     });
   },
-  getKeyFromRedis: function(key,callback) {
+  //whiout L1 cache - later need to set L1 cache for each L2 access
+  getKeyFromRedis: function(key, callback) {
     var self = this;
 
     async.waterfall([
@@ -107,14 +108,45 @@ BillingData.prototype = {
         });
       }
     ], function(err, data) {
-        callback(err,data);
+      callback(err, data);
+    });
+  },
+  saveDomainObject: function(item, callback) {
+    var self = this;
+
+    var insertObject = item.adjustToProdiver();
+    self.logger.debug("will save domain object on db ", insertObject);
+
+    self.performOperation("set", "L2", null, {
+      key: insertObject.key,
+      field: insertObject.field,
+      value: insertObject.value,
+      callback: function(err, data) {
+        if (callback) {
+          callback(err, data);
+        }
+      }
+    });
+
+  },
+  //next thing is apply L1 cache
+  listDomainObject: function(item, callback) {
+    var self = this;
+    self.logger.debug("will list item ", item);
+
+    self.performOperation("getAll", "L2", null, {
+      key: item.key,
+      callback: function(err, data) {
+        if (callback) {
+          callback(err, data);
+        }
+      }
     });
 
   },
   performOperation: function(operation, level, time, args) {
 
     var self = this;
-
     self.cachesStore[level][operation].apply(self.cachesStore[level], [args]);
 
     if (time) {
