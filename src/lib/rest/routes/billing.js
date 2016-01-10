@@ -24,7 +24,6 @@ router.post('/charge', function(req, res) {
     },
     function(chargeData, callback) {
       BillingLib.charge(chargeData.input, function(err,data){
-        console.log("after billing lib")
 
         callback(err,data);
       });
@@ -33,8 +32,6 @@ router.post('/charge', function(req, res) {
 
     console.log("data is ", data)
     var chargeOuput = new ChargeOuput(err, data);
-    console.log(chargeOuput)
-
     res.send(chargeOuput.statusCode, chargeOuput.output);
   });
 

@@ -1,6 +1,8 @@
 
 var output = function(err,data){
-  var output = {}
+  var output = {
+    
+  }
   var statusCode =0;
   if(err){
       statusCode = 500;

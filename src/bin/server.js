@@ -43,15 +43,10 @@ function start(err, data) {
 
         var server = app.listen(app.get('port'), function() {
           logger.warn("server is running on port " + server.address().port)
-
         });
-
       });
 
     });
-
-
-
 
   }
 }

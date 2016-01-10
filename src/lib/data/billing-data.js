@@ -30,9 +30,6 @@ BillingData.prototype = {
 
     this.configuration = configuration;
 
-    console.log("config for data billing is ")
-    console.log(this.configuration)
-
     this.logger = new Logger();
     this.logger.setContext('Billing Data Bussiness');
 
