@@ -1,0 +1,16 @@
+{
+  "name": "billing_proble_talk_desk_tests",
+  "version": "0.0.1",
+  "description": "billing problem talk desk",
+  "keywords": [
+  ],
+  "dependencies": {
+    "async": "^1.4.2",
+    "request": "^2.61.0",
+    "vows": "^0.8.1"
+  },
+  "scripts": {
+    "test": "node_modules/vows/bin/vows --spec routes/*"
+  },
+  "main": "index"
+}
