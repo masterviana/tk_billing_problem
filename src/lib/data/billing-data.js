@@ -60,6 +60,9 @@ BillingData.prototype = {
     });
 
   },
+  /**
+    initializing store
+  **/
   initializeStore: function(level, callback) {
 
     this.logger.info("Store", level, "initializing");
@@ -92,7 +95,12 @@ BillingData.prototype = {
       }
     });
   },
-  //whiout L1 cache - later need to set L1 cache for each L2 access
+  /**
+    get redis key
+
+    miss - implement cache feature, try read from L1 (memory)
+    if key doesnt exist create on memory and return
+  **/
   getKeyFromRedis: function(key, callback) {
     var self = this;
 
@@ -111,6 +119,13 @@ BillingData.prototype = {
       callback(err, data);
     });
   },
+  /**
+    Insert domain objecton store
+
+    obs : Only have create memory and redis providers, next thing I need to do is create a mongo or mysql provider
+    and insert domain objects on there
+
+  **/
   saveDomainObject: function(item, callback) {
     var self = this;
 
@@ -129,7 +144,12 @@ BillingData.prototype = {
     });
 
   },
-  //next thing is apply L1 cache
+  /**
+    List domain object entity based on given filter
+
+    obs : Only have memory and redis provider, in future one nice feature is appliy multiple layers of cache
+    with mongo, redis and memory to increase performance
+  **/
   listDomainObject: function(item, callback) {
     var self = this;
     self.logger.debug("will list item ", item);

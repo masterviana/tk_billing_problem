@@ -8,6 +8,12 @@ var EventManger = require("../utils/event-manager.js"),
 var PROCESS_SET_OF_LINES_EVENT = "_processLines"
 var INSERT_REDIS = "_INSERT_ON_REDIS"
 
+/**
+  This process will transform the data from twilio database file, in a format key:value format
+  in order to turn the process of getting the country information based on begin of the number more quickly
+**/
+
+
 var etl = function() {
   this.priceDatabasePath = "lib/utils/db-prices/prices.txt";
   this.totalReadLines = 0;
@@ -30,6 +36,10 @@ etl.getInstance = function() {
 
 
 etl.prototype = {
+  /**
+    Open file and read line by line
+    For each read will fired and event to process the line
+  **/
   processFile: function(callback) {
     var self = this;
 
@@ -54,6 +64,11 @@ etl.prototype = {
     });
 
   },
+  /**
+    Process each line of twilio database file
+    transform the column that have the begin of phone number
+    in a key of redis and the country and price information for number on a value
+  **/
   processFileLineHandler: function(line) {
     var self = this;
 
@@ -92,6 +107,9 @@ etl.prototype = {
       self.totalProcessedLines = self.totalProcessedLines + 1;
     }
   },
+  /**
+    Insert object with key and value on redis
+  **/
   insertOnRedis : function(key,obj){
     var self = this;
     // self.logger.debug("will add key on redis key is ",key, " and object is ", JSON.stringify(obj));

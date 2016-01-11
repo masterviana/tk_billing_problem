@@ -13,6 +13,12 @@ router.get('/', function(req, res) {
   res.send(200, "WELCOME TO BILLING API");
 });
 
+/**
+  Action method for charge rote
+  1. validate the input paramteres
+  2. call bussiness logic for charge
+  3. create output object to be sent back
+**/
 router.post('/charge', function(req, res) {
 
   async.waterfall([
@@ -24,7 +30,6 @@ router.post('/charge', function(req, res) {
     },
     function(chargeData, callback) {
       BillingLib.charge(chargeData.input, function(err, data) {
-
         callback(err, data);
       });
     }
@@ -35,6 +40,12 @@ router.post('/charge', function(req, res) {
 
 });
 
+/**
+  Action method for list rote
+  1. validate the input paramteres
+  2. call bussiness logic for list
+  3. create output object to be sent back
+**/
 router.get('/list/:account_name', function(req, res) {
   async.waterfall([
     function(callback) {
@@ -46,7 +57,6 @@ router.get('/list/:account_name', function(req, res) {
       });
     },
     function(listInput, callback) {
-      console.log("will calling bussiness list ");
       BillingLib.list(listInput.input, function(err, data) {
         callback(err, data);
       });
@@ -55,8 +65,6 @@ router.get('/list/:account_name', function(req, res) {
     var listOut = new ListOuput(err, data);
     res.status(listOut.statusCode).send(listOut.output);
   });
-
-
 });
 
 

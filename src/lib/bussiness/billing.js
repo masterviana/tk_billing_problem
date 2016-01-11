@@ -26,7 +26,11 @@ Billing.getInstance = function() {
 
 
 Billing.prototype = {
-
+  /**
+   * calculate charge value of a given call input
+   * get all information about the price tax
+   * apply the formula in order to calculate final price for call
+   **/
   charge: function(input, callback) {
     var self = this;
 
@@ -69,13 +73,17 @@ Billing.prototype = {
   list: function(input, callback) {
     this.logger.debug("try get ", input, " from store ");
 
-    billingData.listDomainObject({
-      key: input.account_name
-    }, function(err, data) {
+    var inboundCall = new InboundCall(input);
+
+    billingData.listDomainObject(inboundCall.adjustToProdiver(), function(err, data) {
       callback(err, data);
     });
 
   },
+  /**
+   * Apply formula calculations after getting all parameters needed
+   * After charge calculation fire event to save the transation on store
+   **/
   applyFormulaCalculationForTotalCharge: function(input, talkdesk_phone_number_info, forwarded_phone_number_info, callback) {
     var self = this;
 
@@ -114,6 +122,9 @@ Billing.prototype = {
     });
 
   },
+  /**
+   * Save Inbound call on store
+   **/
   addCallChargeToClientProfile: function(input, totalCharge) {
     var self = this;
 
@@ -127,6 +138,13 @@ Billing.prototype = {
     });
 
   },
+  /**
+   * Apply the margin for talk desk number
+   * if country is "United States" the margin is 0.003
+   * if country is "United Kingdom" the margin is 0.006
+   * Margin for hardcode country are defined on configuration in order to change more easliy on future
+   * If number not belong to the previous country will apply the tax from twillio
+   **/
   talkDeskNumberPricePerMinute: function(input, talkdesk_phone_number_info, callback) {
 
     if (talkdesk_phone_number_info.country.indexOf("United States") != -1) {
@@ -139,6 +157,11 @@ Billing.prototype = {
       callback(null, GLOBAL.billingEx.configuration.TALKDESK_SPECIAL_PRICES.DEFAULT_TALKDESK_MARGIN)
     }
   },
+  /**
+   * Apply the margin tax for forwardNumber
+   * The logic behind this if forwardNumber is empty user answer the call on browser and the price is 0.001
+   ** If forwardNumber is not empty will apply twillio prices
+   **/
   externalNumberPricePerMinute: function(input, forwarded_phone_number_info, callback) {
     if (input.forwarded_phone_number == "") {
       this.logger.debug("externalNumberPricePerMinute is ", GLOBAL.billingEx.configuration.TALKDESK_SPECIAL_PRICES.DEFAULT_INCOMING_BROWSER);
@@ -149,13 +172,20 @@ Billing.prototype = {
       callback(null, pricePerMinute);
     }
   },
+  /**
+   *  Just need to get client profile to reajust the margin price based on minutes per mount
+   *  For now it's hardcode on 0.05 that margin are in configuration
+   **/
   caculateProfitMargin: function(input, callback) {
-    //Just need to get client profile to reajust the margin price based on minutes per mount
-    //for now it's hardcode on 0.05
+
     var profitMargin = GLOBAL.billingEx.configuration.TALKDESK_SPECIAL_PRICES.DEFAULT_PROFIT_MARGIN;
     callback(null, profitMargin);
   },
-
+  /**
+   * Try to retreive a given number from redis database.
+   * Iterate from number.lenth until have one number match key on redis if not thorws an error
+   * The redis key represent the begin of number that represent each country
+   **/
   getPriceAndCountryOfNumber: function(number, callback) {
     var self = this;
 

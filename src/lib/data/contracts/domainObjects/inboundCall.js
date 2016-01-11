@@ -1,5 +1,8 @@
 
 
+/**
+ * Domain object to represent call register on database
+ */
 var inboundCall = function(data){
 
   var objectData = {}
