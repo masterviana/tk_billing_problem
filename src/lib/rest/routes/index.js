@@ -7,8 +7,7 @@ module.exports = function (app) {
     next();
   });
 
-  app.use(bodyParser.json()); // for parsing application/json
 
-  // Load billing routes
+  app.use(bodyParser.json());
   app.use('/' + GLOBAL.billingEx.configuration.VERSION + '/billing', require('./billing'));
 };
