@@ -371,9 +371,18 @@ function createStoreProviderInstances(providerName, storeClient) {
             result.push(new MemoryStore());
             break;
         case "MONGO":
-                logger.warn('There is no store provider for \'' + providerName + '\'');
+                var port = storeClient.ports[portIndex];
+                var MongoStore = require('./provider/store-provider-mongo.js');
+                var configItem = {
+                  'MONGO_HOST': storeClient.host,
+                  'MONGO_PORT': port,
+                  'MONGO_PASSWORD': storeClient.password,
+                  'MONGO_DATABASE': storeClient.database
+                }
+                result.push(new MongoStore(configItem));
                 break;
         default:
+
             logger.warn('There is no store provider for \'' + providerName + '\'');
             break;
     }

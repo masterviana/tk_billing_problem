@@ -3,18 +3,17 @@ var Logger = require('../lib/utils/logger/logger.js'),
   EtlProcess = require('../lib/bussiness/etl.js'),
   Configuration = require('../lib/utils/configuration-multi-file/configuration-multi-file.js');
 
-function start(err, data) {
-  logger = new Logger();
+var logger = new Logger();
+
+function start (err, data) {
   if (err) {
     logger.error(err);
     process.exit(1);
   } else {
-
-    logger.setContext("Initialize server");
+    logger.setContext('Initialize server');
 
     GLOBAL.billingEx = Object.create(null);
     GLOBAL.billingEx.configuration = data;
-
 
     if (data.LOG_LEVEL) {
       GLOBAL.billingEx.configuration.LOG_LEVEL = data.LOG_LEVEL;
@@ -30,19 +29,18 @@ function start(err, data) {
 
     logger.setLevel(GLOBAL.billingEx.configuration.LOG_LEVEL);
 
-    logger.debug("will Initializate billing data");
+    logger.debug('will Initializate billing data');
 
-    //Initializate data providers
-    BillingData.initialize(data, function() {
-      logger.debug("billing data initializate");
+    // Initializate data providers
+    BillingData.initialize(data, function () {
+      logger.debug('billing data initializate');
 
-      EtlProcess.processFile(function(err, data) {
-
+      EtlProcess.processFile(function (err, data) {
         var app = require('../lib/rest/rest-server');
         app.set('port', process.env.PORT || GLOBAL.billingEx.configuration.PORT);
 
-        var server = app.listen(app.get('port'), function() {
-          logger.warn("server is running on port " + server.address().port)
+        var server = app.listen(app.get('port'), function () {
+          logger.warn('server is running on port ' + server.address().port);
         });
       });
 
@@ -55,18 +53,9 @@ var options = [{
   'short': 'v',
   'long': 'VERSION',
   'description': 'Show current tag and exit.',
-  callback: function() {
-    Git.currentTag(
-      __dirname,
-      function(tag) {
-        logger.info("Tag:", tag);
-        process.exit(0);
-      },
-      function(error) {
-        logger.error(error);
-        process.exit(1);
-      }
-    )
+  callback: function () {
+    logger.info('Tag: vb');
+
   }
 }, {
   'short': 'l',
@@ -94,6 +83,6 @@ var options = [{
   'required': false
 }];
 
-Configuration.getOptParams(options, function(opt) {
+Configuration.getOptParams(options, function (opt) {
   Configuration.loadFromFile(opt, start);
 });

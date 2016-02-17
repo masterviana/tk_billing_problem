@@ -1,14 +1,13 @@
-
-var output = function(err,data){
+var output = function (err, data) {
   var output = {
-    
-  }
-  var statusCode =0;
-  if(err){
-      statusCode = 500;
-      output.error = err;
-      output.data = null;
-  }else{
+
+  };
+  var statusCode = 0;
+  if (err) {
+    statusCode = 500;
+    output.error = err;
+    output.data = null;
+  } else {
     statusCode = 200;
     output.error = null;
     output.data = data;
@@ -17,8 +16,6 @@ var output = function(err,data){
   this.statusCode = statusCode;
   this.output = output;
 
-}
-
-
+};
 
 exports = module.exports = output;
